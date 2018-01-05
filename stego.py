@@ -11,9 +11,11 @@ class BitmapEncoder():
 
     def encode_simple_raw_message(self, message, output):
         '''
-
-        :param message:
-        :return:
+        Simple encoder function that does a basic lsb substitution to hide a message in a cover image. This function
+        does not use encryption or any advanced techniques for hiding the information.
+        :param message: The message that you wish to hide inside the cover image
+        :param output: The location to write the output image
+        :return: None
         '''
         rgb_source = self.image.convert('RGB') # convert image to rgb
         pixels = rgb_source.load() # load the pixel map
@@ -44,20 +46,26 @@ class BitmapEncoder():
 
     @staticmethod
     def decode_simple_raw_message(image):
+        '''
+        Simple decode function that is able to extract messages hidden using the matching simple lsb encode function
+        "encode_simple_raw_message" above.
+        :param image: Location of image with the hidden message in it
+        :return: Returns the message that was extracted
+        '''
         rgb_source = Image.open(image).convert('RGB')
-        width, height = rgb_source.size
+        width, height = rgb_source.size # get dimensions of the image to constrain the extraction
         embedded_message_length = 0
-        for idx in range(0,4):
-            r, g, b = rgb_source.getpixel((idx,0))
-            original_byte = ((r & 0x7) << 5) + ((g & 0x7) << 2) + (b & 3)
-            embedded_message_length += original_byte << (8 * (3 - idx))
+        for idx in range(0,4): # extract the message length bytes and reconstruct the message length
+            r, g, b = rgb_source.getpixel((idx,0)) # Get the red, green, blue pixel bytes
+            original_byte = ((r & 0x7) << 5) + ((g & 0x7) << 2) + (b & 3) # mask and shift to get the bits we embedded our information in back into the orignal bytes
+            embedded_message_length += original_byte << (8 * (3 - idx)) # reconstruct the length int by shifting the orignal bytes back
         message = ''
-        for idx in range(4, embedded_message_length):
+        for idx in range(4, embedded_message_length): # extract the actual message now
             y = int(idx / width)
             x = idx % width
             r, g, b = rgb_source.getpixel((x, y))
-            original_byte = ((r & 0x7) << 5) + ((g & 0x7) << 2) + (b & 3)
-            message += chr(original_byte)
+            original_byte = ((r & 0x7) << 5) + ((g & 0x7) << 2) + (b & 3) # mask and shift to get the original byte back
+            message += chr(original_byte) # add the ascii character into our message string
         return message
 
 
