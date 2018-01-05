@@ -61,18 +61,8 @@ class BitmapEncoder():
         return message
 
 
-
-
 if __name__ == '__main__':
-    '''
-    Modes:
-        -h Hide
-        -x Extract
-    -i Input Image (always required)
-    -o Output Image (required on -h)
-    -a Algorithm (defaults to simple))
-    Message
-    '''
+
     parser = argparse.ArgumentParser('Stego is a steganography tool used to hide messages inside of BMP and PNG files.')
     subparsers = parser.add_subparsers(dest='cmd')
     subparsers.required = True
